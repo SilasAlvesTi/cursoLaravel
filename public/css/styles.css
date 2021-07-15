@@ -196,6 +196,10 @@
   #items-list span {
     font-size: 14px;
   }
+
+  #description-container {
+    margin-top: 30px;
+  }
   /* footer */
   footer {
     text-align: center;
