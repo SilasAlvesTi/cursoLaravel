@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Event;
 use App\Models\User;
 
+use function PHPUnit\Framework\isEmpty;
+
 class EventController extends Controller
 {
     public function index() {
@@ -87,5 +89,50 @@ class EventController extends Controller
         Event::findOrFail($id)->delete();
 
         return redirect('/dashboard')->with('msg', 'Evento excluido com sucesso!');
+    }
+
+    public function edit($id)
+    {
+        $event = Event::findOrFail($id);
+
+        return view('events.edit', ['event' => $event]);
+    }
+
+    public function update(Request $request)
+    {
+        
+        
+        
+        $data = $request->all();
+
+        // image upload
+        if($request->hasFile('image') && $request->file('image')->isValid()) {
+
+            $requestImage = $request->image;
+
+            $extension = $requestImage->extension();
+
+            $imageName = md5($requestImage->getClientOriginalName() . strtotime("now")) . "." . $extension;
+
+            $requestImage->move(public_path('img/events'), $imageName);
+
+            $data['image'] = $imageName;
+
+        }
+
+        Event::findOrFail($request->id)->update($data);
+
+        // update Json
+        if(!is_null($request->items)){       
+            $updateJson = Event::findOrFail($request->id);
+            $updateJson->items = json_encode($updateJson->items);
+            $updateJson->save();
+        }else {
+            $updateJson = Event::findOrFail($request->id);
+            $updateJson->items = "";
+            $updateJson->save();
+        }
+
+        return redirect('/dashboard')->with('msg', 'Evento editado com sucesso!');
     }
 }
